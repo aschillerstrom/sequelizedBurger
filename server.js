@@ -24,7 +24,7 @@ app.use('/', routes);
 var port = process.env.PORT || 3000;
 
 //changed from orm to sequelize
-db.sequelize.sync({}).then.(function(){
+db.sequelize.sync({}).then(function(){
     app.listen(port, () =>{
         console.log ('listening on port 3000');
     })
