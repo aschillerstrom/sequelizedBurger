@@ -1,31 +1,41 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var methodOverride = require('method-override')
+var methodOverride = require('method-override');
 
 var app = express();
 
-//Serve static content for the app from the "public" directory in the application directory.
+
+var models  = require('./models');
+
+// added for our sequelize connection 
+var sequelizeConnection = models.sequelize;
+
+sequelizeConnection.query('SET FOREIGN_KEY_CHECKS = 0')
+// make our tables
+.then(function(){
+  // return sequelizeConnection.sync({force:true})
+  console.log("Not resetting the database");
+})
+
+
 app.use(express.static(process.cwd() + '/public'));
 
 app.use(bodyParser.urlencoded({
-	extended: false
-}))
-// override with POST having ?_method=DELETE
-app.use(methodOverride('_method'))
+  extended: false
+}));
+
+
+app.use(methodOverride('_method'));
 var exphbs = require('express-handlebars');
 app.engine('handlebars', exphbs({
-    defaultLayout: 'main',
+  defaultLayout: 'main'
 }));
+
 app.set('view engine', 'handlebars');
 
 var routes = require('./controllers/burgers_controller.js');
 app.use('/', routes);
 
-var port = process.env.PORT || 3000;
-
-//changed from orm to sequelize
-db.sequelize.sync({}).then(function(){
-    app.listen(port, () =>{
-        console.log ('listening on port 3000');
-    })
-});
+var PORT = 3000;
+// app.listen(port);
+app.listen(process.env.PORT || PORT);
