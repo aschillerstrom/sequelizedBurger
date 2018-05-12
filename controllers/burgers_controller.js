@@ -1,42 +1,74 @@
 var express = require('express');
 var router = express.Router();
-var burgers = require('../models/burger.js');
+var models = require('../models'); 
 
 
+// added for sequelize
+var sequelizeConnection = models.sequelize;
+
+// Sync the tables
+sequelizeConnection.sync();
 
 
-router.get('/', function(req, res){
-	res.redirect('/burgers')
+// Create routes
+// ----------------------------------------------------
+
+
+router.get('/', function (req, res) {
+  res.redirect('/index');
 });
 
-router.get('/burgers', function(req, res){
-	burgers.findAll(function(data){
-		var hbsObject = {burgers: data};
 
-		console.log(hbsObject);
 
-		res.render('index', hbsObject);
-	});
+
+router.get('/index', function (req, res) {
+
+  // Sequelize Query to get all burgers
+  models.burgers.findAll({
+   include: [{model: models.devourers}]
+  }).then(function(data){
+
+    
+    var hbsObject = { burgers: data };
+    console.log(data);
+    res.render('index', hbsObject);
+
+  })
+
 });
 
-router.post('/burgers/create', function(req, res){
-	burgers.create(['burgerName'], [req.body.b_name], function(data){
-		res.redirect('/burgers')
-	});
-});
+
+
+
+router.post('/burger/create', function (req, res) {
+
+  // Sequelize Query 
+  models.burgers.create(
+    {
+      burgerName: req.body.burgerName,
+      devoured: false
+    }
+  ).
+    res.redirect('/index');
+  });
+
+
+
+
+
 
 router.put('/burgers/update/:id', function(req, res){
-	var condition = 'id = ' + req.params.id;
-
-	console.log('condition ', condition);
-
-	burgers.update({'devoured': req.body.devoured}, condition, function(data){
-		res.redirect('/burgers');
+		var condition = 'id = ' + req.params.id;
+	
+		console.log('condition ', condition);
+	
+		models.burgers.update({'devoured': req.body.devoured}, condition, function(data){
+			res.redirect('/burgers');
+		});
 	});
-});
 
+// ----------------------------------------------------
+
+
+// Export routes
 module.exports = router;
-
-
-
-///review https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes
